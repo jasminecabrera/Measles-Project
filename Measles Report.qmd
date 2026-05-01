@@ -976,6 +976,7 @@ vif(m4)
 ```{r}
 #| label: final model
 #| code-fold: true
+#| warning: false
 
 # final model
 final_model <- glm.nb(`Total Measles` ~ cPopDensity + cNomGDP + 
