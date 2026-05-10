@@ -6,7 +6,7 @@ format:
     logo:  "../images/calpolylogo.avif"
     nav-buttons:
       - icon: github
-        href: https://github.com/rjimenezdata
+        href: https://github.com/jasminecabrera
         aria-label: GitHub
     embed-resources: true
 theme: united
@@ -332,7 +332,7 @@ for further analysis.
 ### Average MCV1 Coverage Compared to {height=65%}
 
 ```{r}
-#| title: Average MCV1 Coverage Compared to Primary School Completion Rate
+#| title: Average MCV1 Coverage Compared to Primary School Enrollment & Completion Rate
 # make plot
 
 measles |>
