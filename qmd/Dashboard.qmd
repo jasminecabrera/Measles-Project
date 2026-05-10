@@ -3,7 +3,7 @@ title: "WHO Measles Outbreak Investigation"
 format: 
   dashboard:
     orientation: columns
-    logo:  calpolylogo.avif
+    logo: "../images/calpolylogo.avif"
     nav-buttons:
       - icon: github
         href: https://github.com/jasminecabrera
@@ -27,7 +27,7 @@ library(MASS)
 library(scales)
 library(htmltools)
 
-measles <- read_csv(here::here("report", "measles_df_clean.csv"))
+measles <- read_csv(here::here("data", "measles_df_clean.csv"))
 measles <- measles |>
   rename(`Nominal GDP per Capita` = `Nominal GDP`)
 ```

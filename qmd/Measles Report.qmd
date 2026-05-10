@@ -1,5 +1,5 @@
 ---
-title: "Measles Report"
+title: "Global Measles Data Analysis"
 author: "Jasmine Cabrera"
 format: html
 editor: visual
@@ -38,7 +38,9 @@ Measles is a highly contagious viral respiratory disease that continues to affec
 
     a\) Are these socioeconomic factors correlated with vaccine coverage rate?
 
-## Data
+    b\) How does the measles rate manifests itself in a country's socioeconomic factors?
+
+## Data Sources
 
 ### **WHO Measles Data**
 
@@ -322,7 +324,7 @@ Using the various datasets above, we joined them using the ISO3/Country Code. Th
 ```{r}
 #| message: false
 #| code-fold: true
-measles <- read_csv(here::here("report", "measles_df_clean.csv"))
+measles <- read_csv(here::here("data", "measles_df_clean.csv"))
 
 measles <- measles |>
   rename(`Nominal GDP per Capita` = `Nominal GDP`)
@@ -345,13 +347,14 @@ head(measles) |>
 
 ## Data Summaries & Visualizations
 
-### Exploring Research Question 1: 
+### Exploring Research Question 1:
 
 #### **Table 1:** Annual Measles Cases Rates per Million
 
 ```{r}
 #| code-fold: true
 #| label: figure 1
+#| alt-text: "Table showing annual average measles cases per million and average population for each region. The table is sorted in descending order by average measles cases per million. Columns include Year, Region, Average Population, and Average Measles Cases per Million. Average measles cases values are highlighted with a red to white heatmap."
 library(htmltools)
 
 # visualization
@@ -395,7 +398,7 @@ Table 1 shows that in 2016, Western Pacific countries had the most average cases
 
 ```{r}
 #| code-fold: true
-#| alt-text: "The Americas do not have data for 2012 and 2013. The heatmap indicates that there was a measles outbreak from 2014-2016 in the Western Pacific region. Notably, the African countries seem to have relatively consistent measles cases over time, with a spike in 2019."
+#| alt-text: "Heatmap showing the average measles cases per million across region and years. The y-axis is regions and the x axis is years. Each cell is colored based on the log transformed average measles cases plus 1 to avoid log(0), with a gradient from white (low) to red (high)."
 
 # create plot
 measles_heatmap <- measles |>
@@ -509,6 +512,8 @@ yoy_change <- function(df, region_name) {
 
 ```{r}
 #| echo: false
+#| alt-text: "Table showing annual average population, average measles cases per million, and year over year change in Measles Rate for the Western Pacific Region. Positive changes are highlighted in red, and negative or zero change in white."
+
 # western pacific measles rate change
 yoy_change(measles, "Western Pacific")
 ```
@@ -519,6 +524,8 @@ Between 2014 and 2016, the mean number of measles in the Western Pacific countri
 
 ```{r}
 #| code-fold: true
+#| alt-text: "Line chart showing the average number of measles cases per million over time for six regions: Africa, the Americas, Eastern Mediterranean, Europe, South East Asia, and Western Pacific. Each region is represented by a distinct colored line with points for each year. Labels for each region appear at the end of the most recent year."
+
 # grab label data
 plot_data <- measles |>
   filter(!is.na(`Total Measles per Million`),
@@ -589,7 +596,7 @@ Figure 2 shows substantial variation in measles rates both between regions and o
 
 In contrast, the Americas and South East Asia consistently maintain low measles rates, potentially indicating stronger prevention procedures or more stable vaccination coverage. Europe and the Eastern Mediterranean have experienced the most recent spikes in cases and possess the highest rates as of 2025.
 
-### Exploring Research Question 2: 
+### Exploring Research Question 2:
 
 #### **Figure 3:** Average MCV1 Coverage for One-Year Olds Across Time and Region
 
@@ -597,7 +604,7 @@ In contrast, the Americas and South East Asia consistently maintain low measles 
 #| label: mcv1 plot
 #| warning: false
 #| code-fold: true
-#| alt-text: "The average measles vaccine coverage is substantially lower for countries in Africa than other regions. We also see a dip in coverage globally around the start of the Covid pandemic."
+#| alt-text: "Line chart showing the average MCV1 (Measles-Containing Vaccine First Dose) coverage for one year olds over time across six regions: Africa, the Americas, Eastern Mediterranean, Europe, South East Asia, and Western Pacific. Each region is represented by a colored line with points for each year. Labels for each region appear at the end of the lines on the most recent year. The y-axis shows vaccine coverage as percentages, the x-axis is year."
 
 # grab label data
 label_data <- measles |>
@@ -679,6 +686,8 @@ Together, these results suggest that MCV1 coverage could represent an important 
 ```{r}
 #| echo: false
 #| code-fold: true
+#| alt-text: "Table showing correlations between MCV1 Coverage, GDP per capita, and total measles cases per million for each region. Columns display the correlation of MCV1 coverage with GDP, MCV1 coverage with measles cases, and GDP with measles cases."
+
 measles |>
   filter(!is.na(`MCV1 Coverage`),
          !is.na(`Nominal GDP per Capita`),
@@ -715,6 +724,7 @@ Regions generally exhibit a positive correlation between nominal GDP and MCV1 co
 ```{r}
 #| label: nominal gdp vs. mcv1 coverage
 #| code-fold: true
+#| alt-text: "Hexbin scatterplot showing the relationship between log transformed nominal GDP per capita and MCV1 vaccine coverage for one year olds, faceted by six regions: Africa, the Americas, Eastern Mediterranean, Europe, South East Asia, and Western Pacific. Each region is represented by a separate panel with colored hexagons indicating the density of data points. The y axis shows vaccine coverage as percentages, and the x axis is log GDP per capita in USD."
 measles |>
   filter(!is.na(`Nominal GDP per Capita`),
          `Nominal GDP per Capita` > 0,
@@ -835,12 +845,12 @@ mcv_gdp <- function(region = NULL, country = NULL, year = NULL){
 
 ```{r}
 #| code-fold: true
+#| alt-text: "Table showing countries in the Western Pacific region for the year 2016, including columns for Country, Nominal GDP per capita in USD, MCV1 vaccine coverage for one year olds as a percentage, and total measles cases per million."
+
 mcv_gdp(region = "western pacific", year = 2016)
 ```
-We see in Table 4 that Mongolia had the most severe outbreak in recent history at 
-close to 9500 cases per million in 2016. However, this population was 99% vaccinated 
-with the first round of MCV. We continue to see relatively high rates in Malaysia, 
-Singapore, and New Zealand despite MCV vaccination rate being above 90%.
+
+We see in Table 4 that Mongolia had the most severe outbreak in recent history at close to 9500 cases per million in 2016. However, this population was 99% vaccinated with the first round of MCV. We continue to see relatively high rates in Malaysia, Singapore, and New Zealand despite MCV vaccination rate being above 90%.
 
 ## Statistical Model
 
