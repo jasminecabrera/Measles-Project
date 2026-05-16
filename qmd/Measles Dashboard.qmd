@@ -108,7 +108,7 @@ world_measles <- world |>
 ```
 # Global Measles Data
 
-## Research Question {width="100%"}
+## Research Question {width="100%", height="15%"}
 
 ::: {.card title="Research Question" color="#D4AF37"}
 
@@ -116,12 +116,12 @@ What socioeconomic factors have an effect on Measles infection rate? Are these s
 
 :::
 
-## Socioeconomic Factors (Row 1) {height="85%"}
+## Socioeconomic Factors (Row 2) {height="85%"} 
 
-### Heatmap {width="60%"}
+### Heatmap
 
 ```{r}
-#| title: Average Measles Cases Rates per Million Heatmap
+#| title: Measles Cases per Million (M) Averages Across Time & Region Heatmap
 #| alt-text: "The Americas do not have data for 2012 and 2013. The heatmap indicates that there was a measles outbreak from 2014-2016 in the Western Pacific region. Notably, the African countries seem to have relatively consistent measles cases over time, with a spike in 2019."
 
 # create plot
@@ -156,11 +156,10 @@ measles_heatmap <- measles |>
         axis.title = element_text(size = 12),
         legend.position = "top") +
   
-  # labels and alt text
+  # labels 
   labs(x = "Year",
        y = "",
        fill = "Log(M + 1)",
-       title = "M = Measles Cases per Million",
        caption = "Unlike other regions, the Americas do not have data for 2012 and 2013.") +
   scale_x_continuous(breaks = seq(min(measles$Year),
                                   max(measles$Year),
@@ -290,12 +289,15 @@ measles |>
     "South East Asia" = "#ff9d60",
     "Western Pacific" = "#d4a9ce")) +
   labs(x = "Log Nominal GDP per Capita (USD)",
-       y = "MCV1 Coverage") +
+       y = NULL,
+       subtitle = "MCV1 Coverage vs. Log Nominal GDP per Capita") +
   theme_bw() +
-  theme(legend.position = "none") 
+  theme(legend.position = "none") +
+  scale_x_continuous(labels = \(x) paste0("$", x)) 
 ```
 
-### Num Cases Leaflet Plot {width="60%"}
+
+### Num Cases Leaflet Plot
 
 ```{r}
 #| title: Global Measles Cases in 2024
@@ -374,6 +376,34 @@ for further analysis.
 :::
 
 ## Second Row: Animated Plot {height="60%"}
+
+### Animated Plot
+
+```{r}
+#| title: Romania Measles Cases Trend Compared to the Rest of the World
+measles |>
+  mutate(Country = if_else(Country == "Romania", "Romania", "Rest of World")) |>
+  group_by(Country, Year) |>
+  summarize(mean_cases = mean(`Total Measles per Million`, 
+                              na.rm = TRUE)) |>
+  drop_na() |>
+  ungroup() |>
+  ggplot(aes(x = Year, y = mean_cases)) +
+  geom_line(color = "orange") +
+  geom_point(color = "darkorange") + 
+    labs(x = "Year",
+         y = NULL,
+         subtitle = "Average Total Measles Cases per Million") +
+    theme_minimal() + 
+  theme(panel.grid.minor = element_blank(),
+        legend.position = "none") +
+  transition_states(Country, transition_length = 2, state_length = 1) + 
+  ease_aes("cubic-in-out") + 
+  ggtitle("Measles Case Trend for {closest_state}")
+
+```
+
+### Reactive Output
 ```{r}
 #| content: card-toolbar
 #| title: "Socioeconomic Data"
@@ -386,38 +416,41 @@ selectInput('data_type', 'Select Data',
 
 ```{r}
 #| context: server
+#| message: false
 output$RomaniaData <- renderPlot({
   
   if (input$data_type == "Education & Health") {
     
     p <- measles |>
-      filter(Country == "Romania") |>
-      filter(!is.na(`MCV1 Coverage`)) |>
-      left_join(romania, by = join_by("Year" == "name")) |>
-      left_join(romania_school, by = join_by("Year" == "name")) |>
-      rename(
-        "Primary School Enrollment" = value.y,
-        "Primary School Completion Rate (%)" = value.x,
-        "MCV1 Coverage (%)" = `MCV1 Coverage`
-      ) |>
-      pivot_longer(
-        cols = c(`MCV1 Coverage (%)`, 
-                 `Primary School Enrollment`,
-                 `Primary School Completion Rate (%)`), 
-        names_to = "series",
-        values_to = "value"
-      ) |>
-      mutate(series = factor(series, levels = c(
-        "MCV1 Coverage (%)",
-        "Primary School Enrollment",
-        "Primary School Completion Rate (%)"
-      ))) |>
-      ggplot(aes(x = Year, y = value, color = series)) + 
-      geom_line() + geom_point() +
-      labs(title = "Romania: Education", x = "Year", y = "",
-           color = "Data") +
-      theme_bw() +
-      theme(legend.position = "top")
+  filter(Country == "Romania") |>
+  filter(!is.na(`MCV1 Coverage`)) |>
+  left_join(romania, by = join_by("Year" == "name")) |>
+  left_join(romania_school, by = join_by("Year" == "name")) |>
+  rename(
+    "Primary School Enrollment" = value.y,
+    "Primary School Completion Rate" = value.x,
+    "MCV1 Coverage" = `MCV1 Coverage`
+  ) |>
+  pivot_longer(
+    cols = c(`MCV1 Coverage`, 
+             `Primary School Enrollment`,
+             `Primary School Completion Rate`), 
+    names_to = "series",
+    values_to = "value"
+  ) |>
+  mutate(series = factor(series, levels = c(
+    "MCV1 Coverage",
+    "Primary School Enrollment",
+    "Primary School Completion Rate"
+  ))) |>
+  ggplot(aes(x = Year, y = value, color = series)) + 
+  geom_line() + 
+  geom_point() +
+  labs(title = "Romania: Education", x = "Year", y = "",
+       color = "Data") +
+  theme_bw() +
+  theme(legend.position = "top") +
+  scale_y_continuous(labels = \(x) paste0(x, "%"))
     
   } else if (input$data_type == "Infant Mortality Rate") {
     
@@ -425,19 +458,22 @@ output$RomaniaData <- renderPlot({
       filter(`Indicator Code` == "SP.DYN.IMRT.IN") |>
       ggplot(aes(x = name, y = value)) +
       geom_line(color = "orange") + geom_point(color = "darkorange") +
-      xlim(c(2014, 2024)) + ylim(c(0, 15)) +
+      xlim(c(2014, 2024)) + 
       labs(title = "Infant Mortality Rate", x = "Year", y = "") +
-      theme_minimal()
+      theme_bw() +
+      scale_y_continuous(labels = \(x) paste0(x, "%"))
     
   } else {
     
     p <- romania_tabset |>
       filter(`Indicator Code` == "NY.GDP.PCAP.PP.CD") |>
       ggplot(aes(x = name, y = value)) +
-      geom_line(color = "orange") + geom_point(color = "darkorange") +
+      geom_line(color = "orange") + 
+      geom_point(color = "darkorange") +
       xlim(c(2014, 2024)) +
       labs(title = "GDP per Capita", x = "Year", y = "") +
-      theme_minimal()
+      theme_bw() +
+      scale_y_continuous(labels = \(x) paste0("$", comma(x)))
   }
   
   p
