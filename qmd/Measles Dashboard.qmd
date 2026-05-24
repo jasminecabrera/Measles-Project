@@ -247,7 +247,8 @@ leaflet(world_measles) |>
 ### MCV1 Coverage {.tabset}
 
 ```{r}
-#| title: Average MCV1 Coverage
+#| title: Avg. MCV1 Coverage
+#| warning: false
 label_data <- measles |>
   group_by(Region, Year) |>
   summarise(mean_coverage = mean(`MCV1 Coverage`, na.rm = TRUE),
@@ -297,20 +298,25 @@ mcv1_plot <- measles |>
         plot.subtitle = element_text(face = "bold"),
         legend.title = element_text(face = "bold"),
         axis.title = element_text(face = "bold"),
-        legend.position = "none") +
+        legend.position = "none",
+        plot.margin = margin(t = 5, 
+                             r = 45, 
+                             b = 5, 
+                             l = 5, 
+                             unit = "mm")) +
   
-  # move labels
-  geom_label_repel(data = label_data,
-                  aes(x = Year, y = mean_coverage, 
-                      label = Region, fill = Region),
-                      inherit.aes = FALSE,
-                      nudge_x = 0.5,
-                      direction = "y",
-                      hjust = 0,
-                      segment.color = NA) +
-  
-  # expand grid
-  expand_limits(x = max(label_data$Year) + 5)
+  # move labels outside plot
+  geom_label_repel(
+  data = label_data,
+  aes(x = Year, y = mean_coverage,
+      label = Region, fill = Region),
+  inherit.aes = FALSE,
+  xlim = c(max(label_data$Year) + 3, max(label_data$Year) + 2),
+  hjust = 0,
+  segment.color = NA) +
+
+
+coord_cartesian(clip = "off") 
 
 mcv1_plot
 ```
@@ -345,7 +351,7 @@ measles |>
 ```
 
 ```{r}
-#| title: MCV1 vs. GDP Plot
+#| title: MCV1 vs. GDP
 measles |>
   filter(!is.na(`Nominal GDP per Capita`),
          `Nominal GDP per Capita` > 0,

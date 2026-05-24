@@ -4,9 +4,9 @@ username: jkscabrera
 account: jkscabrera
 server: connect.posit.cloud
 hostUrl: https://api.connect.posit.cloud/v1
-appId: 019e3720-6736-ebbf-ee5c-5f513a201363
+appId: 019e5885-afd1-d660-0150-1db7f41912c1
 bundleId:
-url:
+url: https://connect.posit.cloud/jkscabrera/content/019e5885-afd1-d660-0150-1db7f41912c1
 version: 1
 quarto_version: 1.8.27
 quarto_engines: knitr
